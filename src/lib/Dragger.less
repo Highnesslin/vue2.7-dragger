@@ -1,0 +1,111 @@
+.vdr {
+  position: absolute;
+  box-sizing: border-box;
+  border: 1px dashed transparent;
+}
+.vdr.active {
+  z-index: 999 !important;
+}
+
+.vdr.checking {
+  border-color: #444;
+}
+
+.vdr.active:before {
+  content: '';
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  box-sizing: border-box;
+  border: 1px dashed #444;
+}
+.vdr-stick {
+  box-sizing: border-box;
+  position: absolute;
+  font-size: 1px;
+  background: #ffffff;
+  border: 1px solid #6c6c6c;
+  box-shadow: 0 0 2px #bbb;
+}
+.inactive > .vdr-stick {
+  display: none;
+}
+.vdr-stick-tl,
+.vdr-stick-br {
+  cursor: nwse-resize;
+}
+.vdr-stick-tm,
+.vdr-stick-bm {
+  left: 50%;
+  cursor: ns-resize;
+}
+.vdr-stick-tr,
+.vdr-stick-bl {
+  cursor: nesw-resize;
+}
+.vdr-stick-ml,
+.vdr-stick-mr {
+  top: 50%;
+  cursor: ew-resize;
+}
+.vdr-stick.not-resizable {
+  display: none;
+}
+
+.active .content-container {
+  pointer-events: visible;
+}
+
+.content-container {
+  display: block;
+  position: relative;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+@dashed-offset: 20px;
+
+.asd {
+  display: none;
+  opacity: 0.7;
+  position: absolute;
+  background: #4daeff;
+  z-index: 199111250;
+
+  width: 100%;
+  height: 1px;
+  left: 0;
+
+  width: 1px;
+  height: 100%;
+  top: 0;
+}
+
+@line-spacing: 16px;
+
+// 水平线
+.align-left {
+  position: absolute;
+
+  width: 100%;
+  height: 1px;
+  left: 0;
+
+  background-image: linear-gradient(red 50%, transparent 50%);
+  background-size: 100% @line-spacing;
+}
+
+// 垂直线
+.align-top {
+  position: absolute;
+
+  width: 1px;
+  height: 100%;
+  top: 0;
+
+  background-image: linear-gradient(to right, red 0%, red 50%, transparent 50%);
+  background-size: @line-spacing;
+}
