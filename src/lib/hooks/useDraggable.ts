@@ -4,6 +4,7 @@ import useShared from './useShared'
 type Params = {
   initRect: Record<'x' | 'y' | 'w' | 'h', number>
   isDraggable: () => boolean
+  isParentLimitation: () => boolean,
   event?: {
     onMouseDown?: () => void
     onMove?: (params: Record<'top' | 'right' | 'bottom' | 'left', number>) => void
@@ -11,7 +12,7 @@ type Params = {
   }
 }
 const useDraggable = (options: Params) => {
-  const { isDraggable, event: { onMouseDown, onMove, onMoveEnd } = {} } = options
+  const { isDraggable, isParentLimitation, event: { onMouseDown, onMove, onMoveEnd } = {} } = options
 
   const {
     state,
@@ -25,8 +26,6 @@ const useDraggable = (options: Params) => {
     calcDragLimitation,
     rectCorrectionByLimit,
   } = useShared()
-
-  const parentLimitSize = !state.parentWidth || !state.parentHeight
 
   const { horizontalLine, verticalLine, resetRefLine, nearBounds } = useRefLine()
 
@@ -68,7 +67,7 @@ const useDraggable = (options: Params) => {
       }
     )
 
-    if (parentLimitSize) {
+    if (isParentLimitation()) {
       status.limits = calcDragLimitation()
     }
   }
@@ -85,7 +84,7 @@ const useDraggable = (options: Params) => {
       left: dimensionsBeforeMove.left - delta.x,
     }
 
-    if (parentLimitSize) {
+    if (isParentLimitation()) {
       draft = rectCorrectionByLimit(draft)
     }
 

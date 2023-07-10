@@ -141,6 +141,7 @@ const active = ref(props.isActive as boolean)
 const { horizontalLine, verticalLine, bodyDown, bodyMove, bodyUp } = useDraggable({
   isDraggable: () => active.value,
   initRect: { x: props.x, y: props.y, w: props.w, h: props.h },
+  isParentLimitation: () => props.parentLimitation,
   event: {
     onMouseDown() {
       // state.active = true

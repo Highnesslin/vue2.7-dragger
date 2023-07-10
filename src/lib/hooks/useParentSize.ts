@@ -33,7 +33,6 @@ const useParentSize = function(options: Options) {
     return value
   }
 
-
   onMounted(() => {
     const dom = options.getEl()
     if (!dom) {
