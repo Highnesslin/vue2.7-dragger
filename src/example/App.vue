@@ -11,7 +11,7 @@ import OriginCard from './Card.vue'
 import { withDetection } from '../lib/Detection'
 import { ref } from 'vue'
 const Card = OriginCard
-const DetectionLayout = withDetection('div')
+const DetectionLayout = withDetection(Card)
 
 const active = ref('1')
 const setActive = (id: string) => active.value = id 

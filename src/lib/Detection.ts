@@ -1,4 +1,4 @@
-import Vue, { defineComponent, getCurrentInstance, provide, h, inject, onMounted, Component, AsyncComponent, DefineComponent } from "vue"
+import Vue, { defineComponent, getCurrentInstance, provide, h, inject, onMounted, DefineComponent, Component } from "vue"
 
 export type DragInstance = Vue & {
   _uid: number
@@ -6,12 +6,16 @@ export type DragInstance = Vue & {
 
 const injectKey = '__DragProviderContainers'
 
+const isComponent = (component: Component | string): component is Component => typeof component !== 'string'
+
 /**
  * 参与位置检测
  */
-export const withDetection = function(component: string | Component | AsyncComponent | (() => Component)) {
+export const withDetection = function<T extends Component | string, R = T extends string ? DefineComponent : T>(
+  component: T
+): R {
   return defineComponent({
-    props: typeof component === 'string' ?  {} : (component as DefineComponent).props,
+    props: isComponent(component) && 'props' in component ? component.props : undefined,
     setup() {
       const instance = getCurrentInstance()
       const containers = new Set([] as Element[])
@@ -32,7 +36,7 @@ export const withDetection = function(component: string | Component | AsyncCompo
         this.$slots.default
       )
     },
-  })
+  }) as R
 }
 
 /**
