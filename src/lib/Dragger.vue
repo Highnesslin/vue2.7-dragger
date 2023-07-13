@@ -29,13 +29,12 @@
 
 <script setup lang="ts">
 import { PropType, computed, getCurrentInstance, ref, watch } from 'vue'
-import useDraggable from './hooks/useDraggable'
 import useResizeable from './hooks/useResizeable'
 import useParentSize from './hooks/useParentSize'
+import useAddEvents from './hooks/useAddEvents'
+import useDraggable from './hooks/useDraggable'
 import useHasNest from './hooks/useHasNest'
 import useShared from './hooks/useShared'
-
-import useAddEvents from './hooks/useAddEvents'
 
 const props = defineProps({
   // 辅助线尺寸
@@ -80,27 +79,32 @@ const props = defineProps({
     type: Boolean as PropType<boolean>,
     default: false,
   },
+  // 单位
+  unit: {
+    type: String as PropType<'px' | '%'>,
+    default: 'px',
+  },
   // 宽
   w: {
-    type: Number as PropType<number>,
+    type: [Number, String] as PropType<number | string>,
     default: 200,
     required: true,
   },
   // 高
   h: {
-    type: Number as PropType<number>,
+    type: [Number, String] as PropType<number | string>,
     default: 200,
     required: true,
   },
   // x轴距离
   x: {
-    type: Number as PropType<number>,
+    type: [Number, String] as PropType<number | string>,
     default: 0,
     required: true,
   },
   // y轴距离
   y: {
-    type: Number as PropType<number>,
+    type: [Number, String] as PropType<number | string>,
     default: 0,
     required: true,
   },
@@ -140,7 +144,6 @@ const active = ref(props.isActive as boolean)
  */
 const { horizontalLine, verticalLine, bodyDown, bodyMove, bodyUp } = useDraggable({
   isDraggable: () => active.value,
-  initRect: { x: props.x, y: props.y, w: props.w, h: props.h },
   isParentLimitation: () => props.parentLimitation,
   event: {
     onMouseDown() {

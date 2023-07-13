@@ -1,6 +1,6 @@
 {
   "name": "vue2.7-dragger",
-  "version": "1.0.3",
+  "version": "1.0.7",
   "type": "module",
   "files": [
     "dist"

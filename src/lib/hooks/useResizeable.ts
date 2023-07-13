@@ -30,6 +30,7 @@ const useResizeable = function(options: Options) {
     width,
     height,
     rect,
+    recordState,
     resetStatus,
     saveDimensionsBeforeMove,
     rectCorrectionByLimit,
@@ -49,34 +50,34 @@ const useResizeable = function(options: Options) {
 
   const calcResizeLimits = function() {
     const { aspectFactor } = status
-    const w = width.value
-    const h = height.value
+    const widthValue = width.value
+    const heightValue = height.value
     const { bottom, top, left, right } = state
 
     const limits: typeof status.limits = {
-      left: { min: 0, max: left + w },
-      right: { min: 0, max: right + w },
-      top: { min: 0, max: top + h },
-      bottom: { min: 0, max: bottom + h },
+      left: { min: 0, max: left + widthValue },
+      right: { min: 0, max: right + widthValue },
+      top: { min: 0, max: top + heightValue },
+      bottom: { min: 0, max: bottom + heightValue },
     }
 
     if (aspectRatio) {
       const aspectLimits = {
         left: {
           min: left - Math.min(top, bottom) * aspectFactor * 2,
-          max: left + (h / 2) * aspectFactor * 2,
+          max: left + (heightValue / 2) * aspectFactor * 2,
         },
         right: {
           min: right - Math.min(top, bottom) * aspectFactor * 2,
-          max: right + (h / 2) * aspectFactor * 2,
+          max: right + (heightValue / 2) * aspectFactor * 2,
         },
         top: {
           min: top - (Math.min(left, right) / aspectFactor) * 2,
-          max: top + (w / 2 / aspectFactor) * 2,
+          max: top + (widthValue / 2 / aspectFactor) * 2,
         },
         bottom: {
           min: bottom - (Math.min(left, right) / aspectFactor) * 2,
-          max: bottom + (w / 2 / aspectFactor) * 2,
+          max: bottom + (widthValue / 2 / aspectFactor) * 2,
         },
       }
 
@@ -148,6 +149,8 @@ const useResizeable = function(options: Options) {
     if (!isResizeable() && !force) {
       return
     }
+
+    recordState()
 
     status.stickDrag = true
 

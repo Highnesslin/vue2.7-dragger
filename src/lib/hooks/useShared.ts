@@ -45,6 +45,8 @@ type Shared = {
 
   resetStatus: () => void
 
+  recordState: () => void
+
   saveDimensionsBeforeMove: (
     { pointerX, pointerY }: Record<'pointerX' | 'pointerY', number>,
     state: Record<'top' | 'right' | 'bottom' | 'left' | 'width' | 'height', number>
@@ -89,14 +91,17 @@ const useShared = function(props?: any) {
   let shared = ins[sharedKey]
 
   if (!shared) {
-    const { parentLimitation, x, y } = props || {}
+    const { parentLimitation, unit } = props || {}
+
+    const unitIsPx = unit === 'px'
+
     const state = reactive({
       parentWidth: 0,
       parentHeight: 0,
-      top: y,
+      top: 0,
       right: 0,
       bottom: 0,
-      left: x,
+      left: 0,
     })
 
     const status = {
@@ -134,19 +139,43 @@ const useShared = function(props?: any) {
       return (parentLimitation ? state.parentHeight : 0) - state.top - state.bottom
     })
 
-    const positionStyle = computed(() => ({
-      top: state.top + 'px',
-      left: state.left + 'px',
-      width: width.value + 'px',
-      height: height.value + 'px'
-    }))
+    const getter = {
+      left: () => unitIsPx ? props.x : getNumberValue(props.x) * state.parentWidth,
+      top: () => unitIsPx ? props.y : getNumberValue(props.y) * state.parentHeight,
+      right: () => unitIsPx ? (state.parentWidth - props.w - state.left) : (state.parentWidth - getNumberValue(props.w) * state.parentWidth - state.left),
+      bottom: () => unitIsPx ? (state.parentHeight - props.h - state.top) : (state.parentHeight - getNumberValue(props.h) * state.parentHeight - state.top),
+    }
+
+    const setter = {
+      top: () => unitIsPx ? state.top : (state.top ? state.top / state.parentHeight : 0) * 100,
+      left: () => unitIsPx ? state.left : (state.left ? state.left / state.parentWidth : 0) * 100,
+      width: () => unitIsPx ? width.value : (width.value ? width.value / state.parentWidth : 0) * 100,
+      height: () => unitIsPx ? height.value : (height.value ? height.value / state.parentHeight : 0) * 100,
+    }
+
+    const positionStyle = computed(() => {
+      return {
+        top: setter.top() + (unitIsPx ? 'px' : '%'),
+        left: setter.left() + (unitIsPx ? 'px' : '%'),
+        width: setter.width() + (unitIsPx ? 'px' : '%'),
+        height: setter.height() + (unitIsPx ? 'px' : '%'),
+      }
+    })
 
     const rect = computed(() => ({
-      left: Math.round(state.left),
-      top: Math.round(state.top),
-      width: Math.round(width.value),
-      height: Math.round(height.value),
+      top: setter.top(),
+      left: setter.left(),
+      width: setter.width(),
+      height: setter.height(),
     }))
+
+    // 重新记录一次位置、尺寸信息, 防止子组件无法感知父元素变化
+    const recordState = function () {
+      state.left = getter.left()
+      state.top = getter.top()
+      state.right = getter.right()
+      state.bottom = getter.bottom()
+    }
 
     const saveDimensionsBeforeMove = function(
       { pointerX, pointerY }: Record<'pointerX' | 'pointerY', number>,
@@ -171,14 +200,14 @@ const useShared = function(props?: any) {
     const calcDragLimitation = function() {
       const parentWidth = state.parentWidth
       const parentHeight = state.parentHeight
-      const w = width.value
-      const h = height.value
+      const widthValue = width.value
+      const heightValue = height.value
 
       return {
-        left: { min: 0, max: parentWidth - w },
-        right: { min: 0, max: parentWidth - w },
-        top: { min: 0, max: parentHeight - h },
-        bottom: { min: 0, max: parentHeight - h },
+        left: { min: 0, max: parentWidth - widthValue },
+        right: { min: 0, max: parentWidth - widthValue },
+        top: { min: 0, max: parentHeight - heightValue },
+        bottom: { min: 0, max: parentHeight - heightValue },
       }
     }
 
@@ -229,51 +258,23 @@ const useShared = function(props?: any) {
       }
     }
 
-    watch(
-      () => props.x,
-      newVal => {
-        if (status.stickDrag || status.bodyDrag || newVal === state.left) {
-          return
-        }
+    const getNumberValue = function (val: number) {
+      const num = parseFloat(val.toString())
 
-        state.left = newVal
-        state.right = state.parentWidth - state.left - width.value
+      if (!Number.isNaN(num)) {
+        return unitIsPx ? num : num / 100
       }
-    )
 
-    watch(
-      () => props.y,
-      newVal => {
-        if (status.stickDrag || status.bodyDrag || newVal === state.top) {
-          return
-        }
+      throw new Error(val + '不是期望类型')
+    }
 
-        state.top = newVal
-        state.bottom = state.parentHeight - state.top - height.value
+    watch([props.x, props.y, props.w, props.h], ([newLeft, newTop, newWidth, newHeight]) => {
+      if (status.stickDrag || status.bodyDrag) return
+
+      if (newLeft !== state.left || newTop !== state.top || newWidth !== width.value, newHeight !== height.value) {
+        recordState()
       }
-    )
-
-    watch(
-      () => props.w,
-      newVal => {
-        if (status.stickDrag || status.bodyDrag || newVal === width.value) {
-          return
-        }
-
-        state.left = state.parentWidth - newVal - state.right
-      }
-    )
-
-    watch(
-      () => props.h,
-      newVal => {
-        if (status.stickDrag || status.bodyDrag || newVal === height.value) {
-          return
-        }
-
-        state.top = state.parentHeight - newVal - state.bottom
-      }
-    )
+    })
 
     shared = {
       state,
@@ -284,6 +285,7 @@ const useShared = function(props?: any) {
       rect,
       resetStatus,
       saveDimensionsBeforeMove,
+      recordState,
       calcDragLimitation,
       rectCorrectionByLimit,
     }

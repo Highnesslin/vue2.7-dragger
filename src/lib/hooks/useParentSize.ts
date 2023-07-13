@@ -1,4 +1,4 @@
-import { getCurrentInstance, onMounted } from 'vue'
+import { onMounted } from 'vue'
 import useShared from './useShared'
 
 type ShareStyle<T extends number | null> = Record<'width' | 'height', T>
@@ -10,15 +10,14 @@ interface Options {
 
 const useParentSize = function(options: Options) {
   const shared = useShared()
-  const { state } = shared
-  const ins = getCurrentInstance()!.proxy
+  const { state, recordState } = shared
 
   const preValue: ShareStyle<number | null> = {
     width: null,
     height: null,
   }
 
-  const getter = function(type: 'width' | 'height') {
+  const getByResize = function(type: 'width' | 'height') {
     const dom = options.getEl() || { clientWidth: 0, clientHeight: 0 }
     const value = dom[type === 'width' ? 'clientWidth' : 'clientHeight']
 
@@ -41,21 +40,16 @@ const useParentSize = function(options: Options) {
 
     Object.defineProperty(state, 'parentWidth', {
       get() {
-        return getter('width')
+        return getByResize('width')
       },
     })
     Object.defineProperty(state, 'parentHeight', {
       get() {
-        return getter('height')
+        return getByResize('height')
       },
     })
 
-    const { w, h, x, y } = ins.$props
-
-    state.left = x
-    state.top = y
-    state.right = state.parentWidth - w - state.left
-    state.bottom = state.parentHeight - h - state.top
+    recordState()
   })
 }
 

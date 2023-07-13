@@ -13,7 +13,7 @@
       @resizestop="style => handleChange(card.data, style)"
       @dragstop="style => handleChange(card.data, style)"
       @clicked="toggleActive(card.id)"
-    />
+      />
   </DetectionLayout>
 </template>
 
@@ -28,30 +28,10 @@ const state = ref([
     id: 1,
     data: {
       isActive: false,
-      x: 0,
-      y: 0,
-      w: 100,
-      h: 100,
-    }
-  },
-  {
-    id: 2,
-    data: {
-      isActive: false,
-      x: 220,
-      y: 0,
-      w: 100,
-      h: 100,
-    }
-  },
-  {
-    id: 3,
-    data: {
-      isActive: false,
-      x: 440,
-      y: 0,
-      w: 100,
-      h: 100,
+      x: 10,
+      y: 10,
+      w: 12,
+      h: 12,
     }
   }
 ])
@@ -70,6 +50,14 @@ const toggleActive = (id: number) => {
     card.data.isActive = card.id === id
   }
 }
+
+document.addEventListener('click', e => {
+  if((e.target as HTMLElement).id === 'parent') {
+    for (const card of state.value) {
+      card.data.isActive = false
+    }
+  }
+})
 
 </script>
 

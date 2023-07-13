@@ -2,7 +2,6 @@ import useRefLine from './useRefLine'
 import useShared from './useShared'
 
 type Params = {
-  initRect: Record<'x' | 'y' | 'w' | 'h', number>
   isDraggable: () => boolean
   isParentLimitation: () => boolean,
   event?: {
@@ -19,8 +18,7 @@ const useDraggable = (options: Params) => {
     status,
     width,
     height,
-    positionStyle,
-    rect,
+    recordState,
     resetStatus,
     saveDimensionsBeforeMove,
     calcDragLimitation,
@@ -49,6 +47,8 @@ const useDraggable = (options: Params) => {
     if (typeof ev.preventDefault !== 'undefined') {
       ev.preventDefault()
     }
+
+    recordState()
 
     status.bodyDrag = true
 
@@ -124,8 +124,6 @@ const useDraggable = (options: Params) => {
     status,
     width,
     height,
-    positionStyle,
-    rect,
     bodyDown,
     bodyMove,
     bodyUp,
