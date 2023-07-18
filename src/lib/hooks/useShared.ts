@@ -1,4 +1,5 @@
 import { ComputedRef, computed, getCurrentInstance, reactive, watch } from 'vue'
+import { divide, multiply, subtract } from '../utils/number'
 
 type Shared = {
   state: {
@@ -91,7 +92,7 @@ const useShared = function(props?: any) {
   let shared = ins[sharedKey]
 
   if (!shared) {
-    const { parentLimitation, unit } = props || {}
+    const { unit } = props || {}
 
     const unitIsPx = unit === 'px'
 
@@ -131,26 +132,36 @@ const useShared = function(props?: any) {
       aspectFactor: 0,
     }
 
-    const width = computed(() => {
-      return (parentLimitation ? state.parentWidth : 0) - state.left - state.right
-    })
+    const width = computed(() => subtract(state.parentWidth, state.left, state.right))
 
-    const height = computed(() => {
-      return (parentLimitation ? state.parentHeight : 0) - state.top - state.bottom
-    })
+    const height = computed(() => subtract(state.parentHeight, state.top, state.bottom))
+
+    const rateToNumber = function (val: number) {
+      const num = parseFloat(val.toString())
+
+      if (!Number.isNaN(num)) {
+        return divide(num, 100)
+      }
+
+      throw new Error(val + '不是期望类型')
+    }
 
     const getter = {
-      left: () => unitIsPx ? props.x : getNumberValue(props.x) * state.parentWidth,
-      top: () => unitIsPx ? props.y : getNumberValue(props.y) * state.parentHeight,
-      right: () => unitIsPx ? (state.parentWidth - props.w - state.left) : (state.parentWidth - getNumberValue(props.w) * state.parentWidth - state.left),
-      bottom: () => unitIsPx ? (state.parentHeight - props.h - state.top) : (state.parentHeight - getNumberValue(props.h) * state.parentHeight - state.top),
+      left: () => unitIsPx ? props.x : multiply(rateToNumber(props.x), state.parentWidth),
+      top: () => {
+        return unitIsPx ? props.y : multiply(rateToNumber(props.y), state.parentHeight)
+      },
+      right: () => unitIsPx ? (state.parentWidth - props.w - state.left) : subtract(subtract(state.parentWidth, multiply(rateToNumber(props.w), state.parentWidth)),  state.left),
+      bottom: () => unitIsPx ? (state.parentHeight - props.h - state.top) : subtract(subtract(state.parentHeight, multiply(rateToNumber(props.h), state.parentHeight)), state.top),
     }
 
     const setter = {
-      top: () => unitIsPx ? state.top : (state.top ? state.top / state.parentHeight : 0) * 100,
-      left: () => unitIsPx ? state.left : (state.left ? state.left / state.parentWidth : 0) * 100,
-      width: () => unitIsPx ? width.value : (width.value ? width.value / state.parentWidth : 0) * 100,
-      height: () => unitIsPx ? height.value : (height.value ? height.value / state.parentHeight : 0) * 100,
+      top: () => {
+        return unitIsPx ? state.top : multiply((state.top ? divide(state.top, state.parentHeight) : 0), 100)
+      },
+      left: () => unitIsPx ? state.left : multiply((state.left ? divide(state.left, state.parentWidth) : 0), 100),
+      width: () => unitIsPx ? width.value : multiply((width.value ? divide(width.value, state.parentWidth) : 0), 100),
+      height: () => unitIsPx ? height.value : multiply((height.value ? divide(height.value, state.parentHeight) : 0), 100),
     }
 
     const positionStyle = computed(() => {
@@ -258,17 +269,7 @@ const useShared = function(props?: any) {
       }
     }
 
-    const getNumberValue = function (val: number) {
-      const num = parseFloat(val.toString())
-
-      if (!Number.isNaN(num)) {
-        return unitIsPx ? num : num / 100
-      }
-
-      throw new Error(val + '不是期望类型')
-    }
-
-    watch([props.x, props.y, props.w, props.h], ([newLeft, newTop, newWidth, newHeight]) => {
+    watch([() => props.x, () => props.y, () => props.w, () => props.h], ([newLeft, newTop, newWidth, newHeight]) => {
       if (status.stickDrag || status.bodyDrag) return
 
       if (newLeft !== state.left || newTop !== state.top || newWidth !== width.value, newHeight !== height.value) {

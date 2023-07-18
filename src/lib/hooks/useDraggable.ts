@@ -3,7 +3,6 @@ import useShared from './useShared'
 
 type Params = {
   isDraggable: () => boolean
-  isParentLimitation: () => boolean,
   event?: {
     onMouseDown?: () => void
     onMove?: (params: Record<'top' | 'right' | 'bottom' | 'left', number>) => void
@@ -11,7 +10,7 @@ type Params = {
   }
 }
 const useDraggable = (options: Params) => {
-  const { isDraggable, isParentLimitation, event: { onMouseDown, onMove, onMoveEnd } = {} } = options
+  const { isDraggable, event: { onMouseDown, onMove, onMoveEnd } = {} } = options
 
   const {
     state,
@@ -67,9 +66,7 @@ const useDraggable = (options: Params) => {
       }
     )
 
-    if (isParentLimitation()) {
-      status.limits = calcDragLimitation()
-    }
+    status.limits = calcDragLimitation()
   }
 
   const bodyMove = function<E extends Record<'x' | 'y', number>>(delta: E) {
@@ -84,9 +81,7 @@ const useDraggable = (options: Params) => {
       left: dimensionsBeforeMove.left - delta.x,
     }
 
-    if (isParentLimitation()) {
-      draft = rectCorrectionByLimit(draft)
-    }
+    draft = rectCorrectionByLimit(draft)
 
     draft = nearBounds(
       {

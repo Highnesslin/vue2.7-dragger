@@ -37,6 +37,11 @@ import useHasNest from './hooks/useHasNest'
 import useShared from './hooks/useShared'
 
 const props = defineProps({
+  // 是否需要检查嵌套场景: 嵌套时内部的组件要双击选中
+  checkNest: {
+    type: Boolean as PropType<boolean>,
+    default: false,
+  },
   // 辅助线尺寸
   lineSize: {
     type: Number as PropType<number>,
@@ -71,11 +76,6 @@ const props = defineProps({
   },
   // 是否保持宽高比
   aspectRatio: {
-    type: Boolean as PropType<boolean>,
-    default: false,
-  },
-  // 是否限制在父元素范围内
-  parentLimitation: {
     type: Boolean as PropType<boolean>,
     default: false,
   },
@@ -144,7 +144,6 @@ const active = ref(props.isActive as boolean)
  */
 const { horizontalLine, verticalLine, bodyDown, bodyMove, bodyUp } = useDraggable({
   isDraggable: () => active.value,
-  isParentLimitation: () => props.parentLimitation,
   event: {
     onMouseDown() {
       // state.active = true

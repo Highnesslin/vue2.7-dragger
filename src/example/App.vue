@@ -5,15 +5,15 @@
       :key="card.id"
       v-bind="card.data"
       contentClass="card"
-      parentLimitation
       isResizable
       isDraggable
       :stickSize=16
       :lineSize=2
+      unit="%"
       @resizestop="style => handleChange(card.data, style)"
       @dragstop="style => handleChange(card.data, style)"
       @clicked="toggleActive(card.id)"
-      />
+    />
   </DetectionLayout>
 </template>
 
@@ -30,6 +30,16 @@ const state = ref([
       isActive: false,
       x: 10,
       y: 10,
+      w: 12,
+      h: 12,
+    }
+  },
+  {
+    id: 2,
+    data: {
+      isActive: false,
+      x: 20,
+      y: 20,
       w: 12,
       h: 12,
     }
