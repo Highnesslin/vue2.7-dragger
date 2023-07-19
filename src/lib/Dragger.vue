@@ -37,10 +37,15 @@ import useHasNest from './hooks/useHasNest'
 import useShared from './hooks/useShared'
 
 const props = defineProps({
-  // 是否需要检查嵌套场景: 嵌套时内部的组件要双击选中
+  // TODO: 下个版本删除 - 是否需要检查嵌套场景: 嵌套时内部的组件要双击选中
   checkNest: {
     type: Boolean as PropType<boolean>,
-    default: false,
+    default: true,
+  },
+  // TODO: 下个版本删除 - 是否需要检查吸附: 其他组件拖拽时, 当前组件是否参与检查吸附
+  checkDetection: {
+    type: Boolean as PropType<boolean>,
+    default: true,
   },
   // 辅助线尺寸
   lineSize: {
@@ -168,9 +173,6 @@ const { vdrStick, stickDown, stickMove, stickUp } = useResizeable({
   aspectRatio: props.aspectRatio,
 })
 
-// 如果是嵌套拖拽, 则双击选中
-const hasNest = useHasNest()
-
 const move = function(ev: MouseEvent) {
   if (!status.stickDrag && !status.bodyDrag) {
     return
@@ -258,6 +260,10 @@ watch(
   val => (active.value = val)
 )
 
+// 如果是嵌套拖拽, 则双击选中
+const hasNest = props.checkNest // TODO: 下个版本删除 - 
+  ? useHasNest()
+  : false
 const eventName = computed(() => hasNest ? 'dblclick' : 'click')
 </script>
 

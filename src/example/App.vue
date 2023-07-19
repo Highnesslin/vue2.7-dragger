@@ -6,6 +6,8 @@
       v-bind="card.data"
       contentClass="card"
       isResizable
+      :checkDetection=false
+      :checkNest=false
       isDraggable
       :stickSize=16
       :lineSize=2

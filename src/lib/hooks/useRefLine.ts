@@ -1,10 +1,12 @@
 import { reactive, getCurrentInstance, onMounted, onUnmounted, toRefs } from 'vue'
 import { DragInstance, useDetectionContainers } from '../Detection'
 import check from '../utils/ref-line'
+import useShared from './useShared'
 
 const useRefLine = function() {
   const { proxy: instance } = (getCurrentInstance() as unknown) as { proxy: DragInstance }
   const containers = useDetectionContainers()
+  const shared = useShared()
 
   const reflineState = reactive<{
     horizontalLine: (number | null)[] | undefined
@@ -16,13 +18,16 @@ const useRefLine = function() {
     verticalLine: undefined,
   })
 
-  onMounted(() => {
-    containers && containers.add(instance.$el)
-  })
-
-  onUnmounted(() => {
-    containers && containers.delete(instance.$el)
-  })
+  // TODO: 下个版本删除 - 
+  if (shared.checkDetection) {
+    onMounted(() => {
+      containers && containers.add(instance.$el)
+    })
+  
+    onUnmounted(() => {
+      containers && containers.delete(instance.$el)
+    })
+  }
 
   const changeCheckNodes: Element[] = []
 
@@ -46,7 +51,8 @@ const useRefLine = function() {
 
       const arr = containers || new Set()
 
-      const [dragNode, checkNodes] = [...arr!].reduce<[Element, Element[]]>(
+      // TODO: 下个版本删除 - 考虑到会有shared.checkDetection, 这里会把当前dom添加两次进来
+      const [dragNode, checkNodes] = [...arr!, instance.$el].reduce<[Element, Element[]]>(
         (result, item) => {
           if (item === instance.$el) {
             result[0] = item
@@ -65,7 +71,7 @@ const useRefLine = function() {
       check(dragNode, checkNodes, {
         gap: 5,
         callback: (node, conditions) => {
-          const check = () => {
+          const checkCur = () => {
             if (!changeCheckNodes.includes(node)) {
               changeCheckNodes.push(node)
               node.classList.add('checking')
@@ -75,7 +81,7 @@ const useRefLine = function() {
           tempVerticalLine = conditions.top.map((ins, index) => {
             if (!ins.isNearly) return tempVerticalLine ? tempVerticalLine[index] : null
   
-            check()
+            checkCur()
   
             if (Math.abs(top - ins.dragValue) < 10) {
               top = ins.dragValue
@@ -88,7 +94,7 @@ const useRefLine = function() {
           tempHorizontalLine = conditions.left.map((ins, index) => {
             if (!ins.isNearly) return tempHorizontalLine ? tempHorizontalLine[index] : null
   
-            check()
+            checkCur()
   
             if (!changeCheckNodes.includes(node)) {
               changeCheckNodes.push(node)

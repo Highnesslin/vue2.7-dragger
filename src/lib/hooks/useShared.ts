@@ -37,6 +37,8 @@ type Shared = {
     top: string
     left: string
   }>
+  // TODO: 下个版本删除 - 
+  checkDetection: boolean
   rect: ComputedRef<{
     left: number
     top: number
@@ -92,7 +94,10 @@ const useShared = function(props?: any) {
   let shared = ins[sharedKey]
 
   if (!shared) {
-    const { unit } = props || {}
+    const {
+      unit,
+      checkDetection // TODO: 下个版本删除 - 
+    } = props || {}
 
     const unitIsPx = unit === 'px'
 
@@ -147,10 +152,8 @@ const useShared = function(props?: any) {
     }
 
     const getter = {
+      top: () => unitIsPx ? props.y : multiply(rateToNumber(props.y), state.parentHeight),
       left: () => unitIsPx ? props.x : multiply(rateToNumber(props.x), state.parentWidth),
-      top: () => {
-        return unitIsPx ? props.y : multiply(rateToNumber(props.y), state.parentHeight)
-      },
       right: () => unitIsPx ? (state.parentWidth - props.w - state.left) : subtract(subtract(state.parentWidth, multiply(rateToNumber(props.w), state.parentWidth)),  state.left),
       bottom: () => unitIsPx ? (state.parentHeight - props.h - state.top) : subtract(subtract(state.parentHeight, multiply(rateToNumber(props.h), state.parentHeight)), state.top),
     }
@@ -284,6 +287,7 @@ const useShared = function(props?: any) {
       height,
       positionStyle,
       rect,
+      checkDetection, // TODO: 下个版本删除 - 
       resetStatus,
       saveDimensionsBeforeMove,
       recordState,
