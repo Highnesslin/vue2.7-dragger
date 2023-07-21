@@ -10,7 +10,8 @@ export default defineConfig({
     vue(),
     dts({
       include: './src/lib/**',
-      outDir: './dist/dts'
+      outDir: './dist/dts',
+      cleanVueFileName: true
     }),
     minify
   ],
