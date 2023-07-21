@@ -251,7 +251,7 @@ const getVerticalStyle = function(top: number | null) {
 useAddEvents(new Map([
   ['mousemove', move],
   ['mouseup', up],
-  ['mouseleave', up],
+  // ['mouseleave', up],
   ['mousedown', handleMousedown],
 ]))
 
